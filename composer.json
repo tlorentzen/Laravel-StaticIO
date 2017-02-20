@@ -1,9 +1,9 @@
 {
-  "name": "tlorentzen/laravel-imageio",
-  "description": "Allows intergration to ImageIO.net",
+  "name": "tlorentzen/laravel-staticio",
+  "description": "Allows intergration to StaticIO.net",
   "license": "Apache License",
   "homepage": "https://imageio.net",
-  "keywords": ["trait", "laravel", "laravel5", "ImageIO"],
+  "keywords": ["trait", "laravel", "laravel5", "StaticIO"],
   "authors": [
     {
       "name": "Thomas Lorentzen",
@@ -20,7 +20,7 @@
   },
   "autoload": {
     "psr-4": {
-      "Tlorentzen\\ImageIO\\": "src/"
+      "Tlorentzen\\StaticIO\\": "src/"
     }
   },
   "autoload-dev": {

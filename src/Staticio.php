@@ -1,81 +1,14 @@
 <?php
-namespace Tlorentzen\ImageIO;
+namespace Tlorentzen\StaticIO;
 
 /**
- * Copyright (C) 2016 Thomas Lorentzen
+ * Copyright (C) 2017 Thomas Lorentzen
  */
 
-trait ImageioParameterTrait
+class Staticio
 {
-    private $operation = null;
-    private $size = null;
+
     private $parameters = array();
-
-    /**
-     * Set width of the generated image.
-     *
-     * @param integer $value
-     * @return void
-     */
-    public function width($value){
-        if($value > -1 AND (is_integer($value) OR ctype_digit($value))){
-            $this->operation = "width";
-            $this->size = $value;
-        }
-    }
-
-    /**
-     * Set height of the generated image.
-     *
-     * @param integer $value
-     * @return void
-     */
-    public function height($value){
-        if($value > -1 AND (is_integer($value) OR ctype_digit($value))){
-            $this->operation = "height";
-            $this->size = $value;
-        }
-    }
-
-    /**
-     * Fit image to specific width and height.
-     *
-     * @param integer $width
-     * @param integer $height
-     * @return void
-     */
-    public function fit($width, $height){
-        if($width > -1 AND $height > -1 AND (is_integer($width) OR ctype_digit($width)) AND (is_integer($height) OR ctype_digit($height))){
-            $this->operation = "fit";
-            $this->size = $width.'x'.$height;
-        }
-    }
-
-    /**
-     * Crop image to specific width and height.
-     *
-     * @param integer $width
-     * @param integer $height
-     * @return void
-     */
-    public function crop($width, $height){
-        if($width > -1 AND $height > -1 AND (is_integer($width) OR ctype_digit($width)) AND (is_integer($height) OR ctype_digit($height))){
-            $this->operation = "crop";
-            $this->size = $width.'x'.$height;
-        }
-    }
-
-    /**
-     * Minify js, css or json.
-     *
-     * @param boolean $value
-     * @return void
-     */
-    public function minify($value=true){
-        if(is_bool($value)){
-            $this->setParam('minify', $value);
-        }
-    }
 
     /**
      * Grayscale image.
@@ -274,20 +207,8 @@ trait ImageioParameterTrait
     {
         $parameters = "";
 
-        if($this->operation != null AND $this->size != null){
-            $parameters .= $this->operation.$this->size;
-        }
-
-        // Remove unnesesery params from array
-        foreach($this->parameters AS $key => $value)
-        {
-            if(is_null($value) || $value == '' || $value == 0 || $value == false){
-                unset($this->parameters[$key]);
-            }
-        }
-
         if(count($this->parameters) > 0){
-            $parameters .= '.';
+
             foreach($this->parameters AS $key => $value)
             {
                 if(is_null($value) || $value == '' || $value == 0 || $value == false){
@@ -330,4 +251,50 @@ trait ImageioParameterTrait
         }
     }
 
+    public static function getImage($path=null, $width=null, $height=null, $parameters=false)
+    {
+        if(config('staticio.activated')){
+
+            if(is_integer($width) AND is_integer($height)){
+                $size = 'fit'.$width.'x'.$height.'.';
+            }elseif(is_integer($width) AND $height == null){
+                $size = 'width'.$width.'.';
+            }elseif(is_integer($height) AND $width == null){
+                $size = 'height'.$height.'.';
+            }else{
+                $size = '';
+            }
+
+            if($parameters === false OR (!is_string($parameters) OR !is_array($parameters))){
+                $parameters = 'none';
+            }else if(is_array($parameters)){
+                $parameters = implode(".", $parameters);
+            }
+            
+            return 'https://staticio.net/static/'.$size.$parameters.'/'.self::getDomain().$path;
+        }else{
+            return $path;
+        }
+    }
+
+    public static function getTextFile($path, $minify=false)
+    {
+        if(config('staticio.activated')){
+
+            if($minify){
+                $parameters = 'minify';
+            }else{
+                $parameters = 'none';
+            }
+
+            return 'https://staticio.net/static/'.$parameters.'/'.self::getDomain().$path;
+
+        }else{
+            return $path;
+        }
+    }
+
+    private static function getDomain(){
+        return str_replace(array('http://','https://','/'), '', config('staticio.domain'));
+    }
 }
